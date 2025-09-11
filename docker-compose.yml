@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  node-app:
+    build: .
+    image: node-app
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_USERNAME=root
+      - DB_PASSWORD=password
+      - DB_NAME=rental_management
+    ports:
+      - '3000:3000'
+    depends_on:
+      - mysql
+    volumes:
+      - .:/usr/src/node-app
+    networks:
+      - node-network
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - '3306:3306'
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=rental_management
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - node-network
+
+volumes:
+  dbdata:
+
+networks:
+  node-network:
+    driver: bridge

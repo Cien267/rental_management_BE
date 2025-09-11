@@ -1,0 +1,42 @@
+const httpStatus = require('http-status');
+const pick = require('../utils/pick');
+const catchAsync = require('../utils/catchAsync');
+const { utilityMeterReadingService } = require('../services');
+
+const createReading = catchAsync(async (req, res) => {
+  const reading = await utilityMeterReadingService.createReading(req.body);
+  res.status(httpStatus.CREATED).send(reading);
+});
+
+const getReadings = catchAsync(async (req, res) => {
+  const filter = pick(req.query, ['utilityMeterId', 'readingDate']);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const result = await utilityMeterReadingService.queryReadings(filter, options);
+  res.send(result);
+});
+
+const getReading = catchAsync(async (req, res) => {
+  const reading = await utilityMeterReadingService.getReadingById(req.params.readingId);
+  if (!reading) {
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Reading not found' });
+  }
+  res.send(reading);
+});
+
+const updateReading = catchAsync(async (req, res) => {
+  const reading = await utilityMeterReadingService.updateReadingById(req.params.readingId, req.body);
+  res.send(reading);
+});
+
+const deleteReading = catchAsync(async (req, res) => {
+  await utilityMeterReadingService.deleteReadingById(req.params.readingId);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+module.exports = {
+  createReading,
+  getReadings,
+  getReading,
+  updateReading,
+  deleteReading,
+};
