@@ -31,7 +31,7 @@ const getContractById = async (id) => Contract.findByPk(id);
 
 const updateContractById = async (id, updateBody) => {
   const contract = await getContractById(id);
-  if (!contract) throw new ApiError(httpStatus.NOT_FOUND, 'Contract not found');
+  if (!contract) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy hợp đồng');
   Object.assign(contract, updateBody);
   await contract.save();
   return contract;
@@ -39,7 +39,7 @@ const updateContractById = async (id, updateBody) => {
 
 const deleteContractById = async (id) => {
   const contract = await getContractById(id);
-  if (!contract) throw new ApiError(httpStatus.NOT_FOUND, 'Contract not found');
+  if (!contract) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy hợp đồng');
   await contract.destroy();
   return contract;
 };

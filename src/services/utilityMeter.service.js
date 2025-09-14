@@ -31,7 +31,7 @@ const getUtilityMeterById = async (id) => UtilityMeter.findByPk(id);
 
 const updateUtilityMeterById = async (id, updateBody) => {
   const meter = await getUtilityMeterById(id);
-  if (!meter) throw new ApiError(httpStatus.NOT_FOUND, 'Utility meter not found');
+  if (!meter) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy đồng hồ điện nước');
   Object.assign(meter, updateBody);
   await meter.save();
   return meter;
@@ -39,7 +39,7 @@ const updateUtilityMeterById = async (id, updateBody) => {
 
 const deleteUtilityMeterById = async (id) => {
   const meter = await getUtilityMeterById(id);
-  if (!meter) throw new ApiError(httpStatus.NOT_FOUND, 'Utility meter not found');
+  if (!meter) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy đồng hồ điện nước');
   await meter.destroy();
   return meter;
 };

@@ -31,7 +31,7 @@ const getPaymentById = async (id) => Payment.findByPk(id);
 
 const updatePaymentById = async (id, updateBody) => {
   const payment = await getPaymentById(id);
-  if (!payment) throw new ApiError(httpStatus.NOT_FOUND, 'Payment not found');
+  if (!payment) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy thanh toán');
   Object.assign(payment, updateBody);
   await payment.save();
   return payment;
@@ -39,7 +39,7 @@ const updatePaymentById = async (id, updateBody) => {
 
 const deletePaymentById = async (id) => {
   const payment = await getPaymentById(id);
-  if (!payment) throw new ApiError(httpStatus.NOT_FOUND, 'Payment not found');
+  if (!payment) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy thanh toán');
   await payment.destroy();
   return payment;
 };

@@ -18,7 +18,7 @@ const getProperties = catchAsync(async (req, res) => {
 const getProperty = catchAsync(async (req, res) => {
   const property = await propertyService.getPropertyById(req.params.propertyId);
   if (!property) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Property not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy tài sản' });
   }
   res.send(property);
 });

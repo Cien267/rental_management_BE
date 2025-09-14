@@ -9,7 +9,7 @@ const ApiError = require('../utils/ApiError');
  */
 const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email đã được sử dụng');
   }
   return User.create(userBody);
 };
@@ -76,12 +76,35 @@ const getUserByEmail = async (email) => {
 const updateUserById = async (userId, updateBody) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người dùng');
   }
+
+  // Check if email is already taken by another user
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email đã được sử dụng');
   }
-  Object.assign(user, updateBody);
+
+  // Handle password change if currentPassword and newPassword are provided
+  if (updateBody.currentPassword && updateBody.newPassword) {
+    // Verify current password
+    const isCurrentPasswordValid = await user.isPasswordMatch(updateBody.currentPassword);
+    if (!isCurrentPasswordValid) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Mật khẩu hiện tại không đúng');
+    }
+
+    // Update password with new password
+    user.password = updateBody.newPassword;
+
+    // Create a copy of updateBody without password fields to avoid mutation
+    const { currentPassword, newPassword, ...otherFields } = updateBody;
+    Object.assign(user, otherFields);
+  } else if (updateBody.currentPassword || updateBody.newPassword) {
+    // If only one password field is provided, it's an error
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Cần cung cấp cả mật khẩu hiện tại và mật khẩu mới để thay đổi mật khẩu');
+  } else {
+    // Update other fields
+    Object.assign(user, updateBody);
+  }
   await user.save();
   return user;
 };
@@ -94,7 +117,7 @@ const updateUserById = async (userId, updateBody) => {
 const deleteUserById = async (userId) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người dùng');
   }
   await user.destroy();
   return user;

@@ -21,7 +21,7 @@ const errorConverter = (err, req, res, next) => {
     // Handle other Sequelize errors
     else if (err.name && err.name.startsWith('Sequelize')) {
       const statusCode = httpStatus.BAD_REQUEST;
-      const message = err.message || 'Database error';
+      const message = err.message || 'Lỗi cơ sở dữ liệu';
       error = new ApiError(statusCode, message, false, err.stack);
     }
     // Handle other errors

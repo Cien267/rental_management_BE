@@ -18,7 +18,7 @@ const getInvoices = catchAsync(async (req, res) => {
 const getInvoice = catchAsync(async (req, res) => {
   const invoice = await invoiceService.getInvoiceById(req.params.invoiceId);
   if (!invoice) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Invoice not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hóa đơn' });
   }
   res.send(invoice);
 });

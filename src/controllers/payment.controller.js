@@ -18,7 +18,7 @@ const getPayments = catchAsync(async (req, res) => {
 const getPayment = catchAsync(async (req, res) => {
   const payment = await paymentService.getPaymentById(req.params.paymentId);
   if (!payment) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Payment not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy thanh toán' });
   }
   res.send(payment);
 });

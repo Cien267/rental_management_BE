@@ -18,7 +18,7 @@ const getRooms = catchAsync(async (req, res) => {
 const getRoom = catchAsync(async (req, res) => {
   const room = await roomService.getRoomById(req.params.roomId);
   if (!room) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Room not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng' });
   }
   res.send(room);
 });

@@ -11,6 +11,7 @@ const utilityMeterReadingRoute = require('./utilityMeterReading.route');
 const extraFeeRoute = require('./extraFee.route');
 const invoiceRoute = require('./invoice.route');
 const paymentRoute = require('./payment.route');
+const uploadRoute = require('./upload.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -59,6 +60,10 @@ const defaultRoutes = [
   {
     path: '/payments',
     route: paymentRoute,
+  },
+  {
+    path: '/upload',
+    route: uploadRoute,
   },
 ];
 

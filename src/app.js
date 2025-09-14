@@ -39,6 +39,9 @@ app.use(compression());
 app.use(cors());
 app.options('*', cors());
 
+// serve static files from uploads directory
+app.use('/uploads', express.static('uploads'));
+
 // jwt authentication
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
@@ -53,7 +56,7 @@ app.use('/v1', routes);
 
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
-  next(new ApiError(httpStatus.NOT_FOUND, 'Not found'));
+  next(new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy'));
 });
 
 // convert error to ApiError, if needed

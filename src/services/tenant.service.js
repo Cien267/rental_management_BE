@@ -31,7 +31,7 @@ const getTenantById = async (id) => Tenant.findByPk(id);
 
 const updateTenantById = async (id, updateBody) => {
   const tenant = await getTenantById(id);
-  if (!tenant) throw new ApiError(httpStatus.NOT_FOUND, 'Tenant not found');
+  if (!tenant) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người thuê');
   Object.assign(tenant, updateBody);
   await tenant.save();
   return tenant;
@@ -39,7 +39,7 @@ const updateTenantById = async (id, updateBody) => {
 
 const deleteTenantById = async (id) => {
   const tenant = await getTenantById(id);
-  if (!tenant) throw new ApiError(httpStatus.NOT_FOUND, 'Tenant not found');
+  if (!tenant) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người thuê');
   await tenant.destroy();
   return tenant;
 };

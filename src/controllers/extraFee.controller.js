@@ -18,7 +18,7 @@ const getExtraFees = catchAsync(async (req, res) => {
 const getExtraFee = catchAsync(async (req, res) => {
   const fee = await extraFeeService.getExtraFeeById(req.params.extraFeeId);
   if (!fee) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Extra fee not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phí phụ thu' });
   }
   res.send(fee);
 });

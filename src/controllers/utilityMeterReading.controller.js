@@ -18,7 +18,7 @@ const getReadings = catchAsync(async (req, res) => {
 const getReading = catchAsync(async (req, res) => {
   const reading = await utilityMeterReadingService.getReadingById(req.params.readingId);
   if (!reading) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Reading not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy chỉ số đọc' });
   }
   res.send(reading);
 });

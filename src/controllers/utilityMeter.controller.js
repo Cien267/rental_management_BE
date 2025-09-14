@@ -18,7 +18,7 @@ const getUtilityMeters = catchAsync(async (req, res) => {
 const getUtilityMeter = catchAsync(async (req, res) => {
   const meter = await utilityMeterService.getUtilityMeterById(req.params.utilityMeterId);
   if (!meter) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Utility meter not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy đồng hồ điện nước' });
   }
   res.send(meter);
 });

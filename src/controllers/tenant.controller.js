@@ -18,7 +18,7 @@ const getTenants = catchAsync(async (req, res) => {
 const getTenant = catchAsync(async (req, res) => {
   const tenant = await tenantService.getTenantById(req.params.tenantId);
   if (!tenant) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Tenant not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê' });
   }
   res.send(tenant);
 });

@@ -31,7 +31,7 @@ const getExtraFeeById = async (id) => ExtraFee.findByPk(id);
 
 const updateExtraFeeById = async (id, updateBody) => {
   const fee = await getExtraFeeById(id);
-  if (!fee) throw new ApiError(httpStatus.NOT_FOUND, 'Extra fee not found');
+  if (!fee) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phí phụ thu');
   Object.assign(fee, updateBody);
   await fee.save();
   return fee;
@@ -39,7 +39,7 @@ const updateExtraFeeById = async (id, updateBody) => {
 
 const deleteExtraFeeById = async (id) => {
   const fee = await getExtraFeeById(id);
-  if (!fee) throw new ApiError(httpStatus.NOT_FOUND, 'Extra fee not found');
+  if (!fee) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phí phụ thu');
   await fee.destroy();
   return fee;
 };

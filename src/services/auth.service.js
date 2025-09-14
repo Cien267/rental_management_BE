@@ -4,7 +4,6 @@ const userService = require('./user.service');
 const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
-
 /**
  * Login with username and password
  * @param {string} email
@@ -14,7 +13,7 @@ const { tokenTypes } = require('../config/tokens');
 const loginUserWithEmailAndPassword = async (email, password) => {
   const user = await userService.getUserByEmail(email);
   if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Email hoặc mật khẩu không đúng');
   }
   return user;
 };
@@ -33,7 +32,7 @@ const logout = async (refreshToken) => {
     },
   });
   if (!refreshTokenDoc) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy');
   }
   await refreshTokenDoc.destroy();
 };
@@ -53,7 +52,7 @@ const refreshAuth = async (refreshToken) => {
     await refreshTokenDoc.destroy();
     return tokenService.generateAuthTokens(user);
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Vui lòng xác thực');
   }
 };
 
@@ -73,7 +72,7 @@ const resetPassword = async (resetPasswordToken, newPassword) => {
     await userService.updateUserById(user.id, { password: newPassword });
     await Token.destroy({ where: { userId: user.id, type: tokenTypes.RESET_PASSWORD } });
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Đặt lại mật khẩu thất bại');
   }
 };
 
@@ -92,7 +91,7 @@ const verifyEmail = async (verifyEmailToken) => {
     await Token.destroy({ where: { userId: user.id, type: tokenTypes.VERIFY_EMAIL } });
     await userService.updateUserById(user.id, { isEmailVerified: true });
   } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Email verification failed');
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Xác thực email thất bại');
   }
 };
 

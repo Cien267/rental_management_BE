@@ -18,7 +18,7 @@ const getContracts = catchAsync(async (req, res) => {
 const getContract = catchAsync(async (req, res) => {
   const contract = await contractService.getContractById(req.params.contractId);
   if (!contract) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Contract not found' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng' });
   }
   res.send(contract);
 });

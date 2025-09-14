@@ -31,7 +31,7 @@ const getRoomById = async (id) => Room.findByPk(id);
 
 const updateRoomById = async (id, updateBody) => {
   const room = await getRoomById(id);
-  if (!room) throw new ApiError(httpStatus.NOT_FOUND, 'Room not found');
+  if (!room) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng');
   Object.assign(room, updateBody);
   await room.save();
   return room;
@@ -39,7 +39,7 @@ const updateRoomById = async (id, updateBody) => {
 
 const deleteRoomById = async (id) => {
   const room = await getRoomById(id);
-  if (!room) throw new ApiError(httpStatus.NOT_FOUND, 'Room not found');
+  if (!room) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng');
   await room.destroy();
   return room;
 };

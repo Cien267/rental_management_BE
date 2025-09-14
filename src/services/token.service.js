@@ -62,7 +62,7 @@ const verifyToken = async (token, type) => {
     },
   });
   if (!tokenDoc) {
-    throw new Error('Token not found');
+    throw new Error('Không tìm thấy token');
   }
   return tokenDoc;
 };
@@ -100,7 +100,7 @@ const generateAuthTokens = async (user) => {
 const generateResetPasswordToken = async (email) => {
   const user = await userService.getUserByEmail(email);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy người dùng với email này');
   }
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
   const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);

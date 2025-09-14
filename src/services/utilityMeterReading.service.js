@@ -31,7 +31,7 @@ const getReadingById = async (id) => UtilityMeterReading.findByPk(id);
 
 const updateReadingById = async (id, updateBody) => {
   const reading = await getReadingById(id);
-  if (!reading) throw new ApiError(httpStatus.NOT_FOUND, 'Reading not found');
+  if (!reading) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy chỉ số đọc');
   Object.assign(reading, updateBody);
   await reading.save();
   return reading;
@@ -39,7 +39,7 @@ const updateReadingById = async (id, updateBody) => {
 
 const deleteReadingById = async (id) => {
   const reading = await getReadingById(id);
-  if (!reading) throw new ApiError(httpStatus.NOT_FOUND, 'Reading not found');
+  if (!reading) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy chỉ số đọc');
   await reading.destroy();
   return reading;
 };

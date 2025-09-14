@@ -22,26 +22,36 @@ const getUsers = {
 
 const getUser = {
   params: Joi.object().keys({
-    userId: Joi.string().custom(objectId),
+    userId: Joi.number().integer().required(),
   }),
 };
 
 const updateUser = {
   params: Joi.object().keys({
-    userId: Joi.required().custom(objectId),
+    userId: Joi.number().integer().required(),
   }),
   body: Joi.object()
     .keys({
       email: Joi.string().email(),
-      password: Joi.string().custom(password),
       name: Joi.string(),
+      currentPassword: Joi.string(),
+      newPassword: Joi.string().custom(password),
     })
-    .min(1),
+    .min(1)
+    .custom((value, helpers) => {
+      // Ensure that if password change is attempted, both fields are provided
+      if ((value.currentPassword && !value.newPassword) || (!value.currentPassword && value.newPassword)) {
+        return helpers.error('any.custom', {
+          message: 'Cần cung cấp cả mật khẩu hiện tại và mật khẩu mới để thay đổi mật khẩu',
+        });
+      }
+      return value;
+    }),
 };
 
 const deleteUser = {
   params: Joi.object().keys({
-    userId: Joi.string().custom(objectId),
+    userId: Joi.number().integer().required(),
   }),
 };
 
