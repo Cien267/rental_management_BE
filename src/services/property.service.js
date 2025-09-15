@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { Op, fn, col, literal } = require('sequelize');
 const { Property, Room, Contract, Invoice, Payment, UtilityMeter, UtilityMeterReading, ExtraFee } = require('../models');
 const ApiError = require('../utils/ApiError');
 
@@ -151,4 +152,109 @@ module.exports = {
   getPropertyById,
   updatePropertyById,
   deletePropertyById,
+  /**
+   * Get dashboard overview data for a property
+   * @param {number} propertyId
+   */
+  getPropertyDashboardById: async (propertyId) => {
+    const property = await Property.findByPk(propertyId);
+    if (!property) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy tài sản');
+
+    // General info
+    const totalRooms = await Room.count({ where: { propertyId } });
+
+    // Rented rooms via active contracts mapped to roomIds under this property
+    const rooms = await Room.findAll({ attributes: ['id', 'status'], where: { propertyId } });
+    const roomIds = rooms.map((r) => r.id);
+
+    let rentedRoomIds = [];
+    if (roomIds.length > 0) {
+      const activeContracts = await Contract.findAll({
+        attributes: ['roomId'],
+        where: {
+          roomId: roomIds,
+          status: 'active',
+          startDate: { [Op.lte]: new Date() },
+          [Op.or]: [{ endDate: null }, { endDate: { [Op.gte]: new Date() } }],
+        },
+        group: ['roomId'],
+      });
+      rentedRoomIds = activeContracts.map((c) => c.roomId);
+    }
+
+    const rentedRooms = rentedRoomIds.length;
+    const availableRooms = Math.max(totalRooms - rentedRooms, 0);
+    const occupancyRate = totalRooms > 0 ? Number(((rentedRooms / totalRooms) * 100).toFixed(2)) : 0;
+
+    // Expiring contracts in next 30 days for rooms in this property
+    const now = new Date();
+    const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    let expiringContracts = 0;
+    if (roomIds.length > 0) {
+      expiringContracts = await Contract.count({
+        where: {
+          roomId: roomIds,
+          status: 'active',
+          endDate: { [Op.ne]: null, [Op.between]: [now, in30Days] },
+        },
+      });
+    }
+
+    // Monthly revenue: sum of invoices' totalAmount for current month for contracts under this property
+    let monthlyRevenue = 0;
+    let unpaidInvoices = 0;
+    if (roomIds.length > 0) {
+      const contracts = await Contract.findAll({ attributes: ['id'], where: { roomId: roomIds } });
+      const contractIds = contracts.map((c) => c.id);
+      if (contractIds.length > 0) {
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+        const revenueRes = await Invoice.findAll({
+          attributes: [[fn('COALESCE', fn('SUM', col('totalAmount')), 0), 'sumTotal']],
+          where: {
+            contractId: contractIds,
+            invoiceDate: { [Op.between]: [startOfMonth, endOfMonth] },
+            status: { [Op.in]: ['partially_paid', 'paid', 'unpaid', 'overdue'] },
+          },
+          raw: true,
+        });
+        monthlyRevenue = Number(revenueRes?.[0]?.sumTotal || 0);
+
+        unpaidInvoices = await Invoice.count({
+          where: {
+            contractId: contractIds,
+            status: { [Op.in]: ['unpaid', 'overdue', 'partially_paid'] },
+          },
+        });
+      }
+    }
+
+    return {
+      stats: {
+        totalRooms,
+        occupancyRate,
+        rentedRooms,
+      },
+      general: {
+        totalRooms,
+        occupancyRate,
+        propertyName: property.name,
+        propertyCode: property.code,
+        propertyAddress: property.address,
+        propertyStatus: property.status,
+      },
+      monthlyRevenue,
+      roomStatus: {
+        totalRooms,
+        rentedRooms,
+        availableRooms,
+        occupancyRate,
+      },
+      attentionRequired: {
+        unpaidInvoices,
+        expiringContracts,
+      },
+    };
+  },
 };

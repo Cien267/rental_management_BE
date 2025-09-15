@@ -39,4 +39,8 @@ module.exports = {
   getProperty,
   updateProperty,
   deleteProperty,
+  getPropertyDashboard: catchAsync(async (req, res) => {
+    const data = await propertyService.getPropertyDashboardById(req.params.propertyId);
+    res.send(data);
+  }),
 };

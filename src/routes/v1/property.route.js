@@ -17,6 +17,10 @@ router
   .patch(auth('manageProperties'), validate(propertyValidation.updateProperty), propertyController.updateProperty)
   .delete(auth('manageProperties'), validate(propertyValidation.deleteProperty), propertyController.deleteProperty);
 
+router
+  .route('/:propertyId/dashboard')
+  .get(auth('getProperties'), validate(propertyValidation.getProperty), propertyController.getPropertyDashboard);
+
 module.exports = router;
 
 /**
@@ -127,4 +131,21 @@ module.exports = router;
  *     responses:
  *       204:
  *         description: No Content
+ */
+/**
+ * @swagger
+ * /properties/{propertyId}/dashboard:
+ *   get:
+ *     summary: Get dashboard overview for a property
+ *     tags: [Properties]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: propertyId
+ *         required: true
+ *         schema: { type: integer }
+ *     responses:
+ *       200:
+ *         description: OK
  */
