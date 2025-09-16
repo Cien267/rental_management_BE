@@ -50,4 +50,10 @@ module.exports = {
   getRoomById,
   updateRoomById,
   deleteRoomById,
+  /**
+   * Query rooms by propertyId
+   */
+  queryRoomsByPropertyId: async (propertyId, options) => {
+    return queryRooms({ propertyId }, options || {});
+  },
 };

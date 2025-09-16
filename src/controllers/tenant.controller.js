@@ -9,10 +9,15 @@ const createTenant = catchAsync(async (req, res) => {
 });
 
 const getTenants = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['fullName', 'phone', 'email', 'idNumber']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (req.params.propertyId || req.query.propertyId) {
+    const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
+    const result = await tenantService.queryTenantsByPropertyId(propertyId, options);
+    return res.send(result);
+  }
+  const filter = pick(req.query, ['fullName', 'phone', 'email', 'idNumber']);
   const result = await tenantService.queryTenants(filter, options);
-  res.send(result);
+  return res.send(result);
 });
 
 const getTenant = catchAsync(async (req, res) => {
@@ -20,15 +25,27 @@ const getTenant = catchAsync(async (req, res) => {
   if (!tenant) {
     return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê' });
   }
+  if (req.params.propertyId) {
+    const belongs = await tenantService.tenantBelongsToProperty(req.params.tenantId, req.params.propertyId);
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong tài sản này' });
+  }
   res.send(tenant);
 });
 
 const updateTenant = catchAsync(async (req, res) => {
+  if (req.params.propertyId) {
+    const belongs = await tenantService.tenantBelongsToProperty(req.params.tenantId, req.params.propertyId);
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong tài sản này' });
+  }
   const tenant = await tenantService.updateTenantById(req.params.tenantId, req.body);
   res.send(tenant);
 });
 
 const deleteTenant = catchAsync(async (req, res) => {
+  if (req.params.propertyId) {
+    const belongs = await tenantService.tenantBelongsToProperty(req.params.tenantId, req.params.propertyId);
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong tài sản này' });
+  }
   await tenantService.deleteTenantById(req.params.tenantId);
   res.status(httpStatus.NO_CONTENT).send();
 });

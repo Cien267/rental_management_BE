@@ -9,10 +9,15 @@ const createContract = catchAsync(async (req, res) => {
 });
 
 const getContracts = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['roomId', 'tenantId', 'status']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (req.params.propertyId || req.query.propertyId) {
+    const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
+    const result = await contractService.queryContractsByPropertyId(propertyId, options);
+    return res.send(result);
+  }
+  const filter = pick(req.query, ['roomId', 'tenantId', 'status']);
   const result = await contractService.queryContracts(filter, options);
-  res.send(result);
+  return res.send(result);
 });
 
 const getContract = catchAsync(async (req, res) => {
@@ -20,15 +25,27 @@ const getContract = catchAsync(async (req, res) => {
   if (!contract) {
     return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng' });
   }
+  if (req.params.propertyId) {
+    const belongs = await contractService.contractBelongsToProperty(req.params.contractId, req.params.propertyId);
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong tài sản này' });
+  }
   res.send(contract);
 });
 
 const updateContract = catchAsync(async (req, res) => {
+  if (req.params.propertyId) {
+    const belongs = await contractService.contractBelongsToProperty(req.params.contractId, req.params.propertyId);
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong tài sản này' });
+  }
   const contract = await contractService.updateContractById(req.params.contractId, req.body);
   res.send(contract);
 });
 
 const deleteContract = catchAsync(async (req, res) => {
+  if (req.params.propertyId) {
+    const belongs = await contractService.contractBelongsToProperty(req.params.contractId, req.params.propertyId);
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong tài sản này' });
+  }
   await contractService.deleteContractById(req.params.contractId);
   res.status(httpStatus.NO_CONTENT).send();
 });

@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Op, fn, col, literal } = require('sequelize');
+const { Op, fn, col } = require('sequelize');
 const { Property, Room, Contract, Invoice, Payment, UtilityMeter, UtilityMeterReading, ExtraFee } = require('../models');
 const ApiError = require('../utils/ApiError');
 
@@ -183,49 +183,63 @@ module.exports = {
     }
 
     const rentedRooms = rentedRoomIds.length;
+    const maintenanceRooms = rooms.filter((r) => r.status === 'maintenance').length;
     const availableRooms = Math.max(totalRooms - rentedRooms, 0);
     const occupancyRate = totalRooms > 0 ? Number(((rentedRooms / totalRooms) * 100).toFixed(2)) : 0;
 
-    // Expiring contracts in next 30 days for rooms in this property
+    // Expiring contracts window markers
     const now = new Date();
     const in30Days = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-    let expiringContracts = 0;
-    if (roomIds.length > 0) {
-      expiringContracts = await Contract.count({
-        where: {
-          roomId: roomIds,
-          status: 'active',
-          endDate: { [Op.ne]: null, [Op.between]: [now, in30Days] },
-        },
-      });
-    }
 
-    // Monthly revenue: sum of invoices' totalAmount for current month for contracts under this property
+    // Monthly revenue: sum of PAID invoices' totalAmount for current month and compare with previous month
     let monthlyRevenue = 0;
-    let unpaidInvoices = 0;
+    let monthlyRevenueChangePercent = null;
+    let unpaidInvoices = [];
     if (roomIds.length > 0) {
       const contracts = await Contract.findAll({ attributes: ['id'], where: { roomId: roomIds } });
       const contractIds = contracts.map((c) => c.id);
       if (contractIds.length > 0) {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+        const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const endOfPrevMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
 
         const revenueRes = await Invoice.findAll({
           attributes: [[fn('COALESCE', fn('SUM', col('totalAmount')), 0), 'sumTotal']],
           where: {
             contractId: contractIds,
             invoiceDate: { [Op.between]: [startOfMonth, endOfMonth] },
-            status: { [Op.in]: ['partially_paid', 'paid', 'unpaid', 'overdue'] },
+            status: 'paid',
           },
           raw: true,
         });
-        monthlyRevenue = Number(revenueRes?.[0]?.sumTotal || 0);
+        monthlyRevenue = Number((revenueRes && revenueRes[0] && revenueRes[0].sumTotal) || 0);
 
-        unpaidInvoices = await Invoice.count({
+        const prevRevenueRes = await Invoice.findAll({
+          attributes: [[fn('COALESCE', fn('SUM', col('totalAmount')), 0), 'sumTotal']],
           where: {
             contractId: contractIds,
-            status: { [Op.in]: ['unpaid', 'overdue', 'partially_paid'] },
+            invoiceDate: { [Op.between]: [startOfPrevMonth, endOfPrevMonth] },
+            status: 'paid',
           },
+          raw: true,
+        });
+        const prevMonthlyRevenue = Number((prevRevenueRes && prevRevenueRes[0] && prevRevenueRes[0].sumTotal) || 0);
+        if (prevMonthlyRevenue > 0) {
+          monthlyRevenueChangePercent = Number(
+            (((monthlyRevenue - prevMonthlyRevenue) / prevMonthlyRevenue) * 100).toFixed(2)
+          );
+        } else {
+          monthlyRevenueChangePercent = null;
+        }
+
+        unpaidInvoices = await Invoice.findAll({
+          attributes: ['id', 'contractId', 'invoiceDate', 'periodStart', 'periodEnd', 'totalAmount', 'status'],
+          where: {
+            contractId: contractIds,
+            status: 'unpaid',
+          },
+          order: [['invoiceDate', 'DESC']],
         });
       }
     }
@@ -245,15 +259,27 @@ module.exports = {
         propertyStatus: property.status,
       },
       monthlyRevenue,
+      monthlyRevenueChangePercent,
       roomStatus: {
         totalRooms,
         rentedRooms,
         availableRooms,
         occupancyRate,
+        maintenanceRooms,
       },
       attentionRequired: {
         unpaidInvoices,
-        expiringContracts,
+        expiringContracts: roomIds.length
+          ? await Contract.findAll({
+              attributes: ['id', 'roomId', 'tenantId', 'startDate', 'endDate', 'status'],
+              where: {
+                roomId: roomIds,
+                status: 'active',
+                endDate: { [Op.ne]: null, [Op.between]: [now, in30Days] },
+              },
+              order: [['endDate', 'ASC']],
+            })
+          : [],
       },
     };
   },

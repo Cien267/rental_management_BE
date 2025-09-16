@@ -12,6 +12,7 @@ const extraFeeRoute = require('./extraFee.route');
 const invoiceRoute = require('./invoice.route');
 const paymentRoute = require('./payment.route');
 const uploadRoute = require('./upload.route');
+const propertyScopedRoute = require('./propertyScoped.route');
 const config = require('../../config/config');
 
 const router = express.Router();
@@ -64,6 +65,10 @@ const defaultRoutes = [
   {
     path: '/upload',
     route: uploadRoute,
+  },
+  {
+    path: '/properties',
+    route: propertyScopedRoute,
   },
 ];
 

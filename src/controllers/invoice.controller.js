@@ -9,10 +9,15 @@ const createInvoice = catchAsync(async (req, res) => {
 });
 
 const getInvoices = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['contractId', 'invoiceDate', 'periodStart', 'periodEnd', 'status']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  if (req.params.propertyId || req.query.propertyId) {
+    const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
+    const result = await invoiceService.queryInvoicesByPropertyId(propertyId, options);
+    return res.send(result);
+  }
+  const filter = pick(req.query, ['contractId', 'invoiceDate', 'periodStart', 'periodEnd', 'status']);
   const result = await invoiceService.queryInvoices(filter, options);
-  res.send(result);
+  return res.send(result);
 });
 
 const getInvoice = catchAsync(async (req, res) => {
