@@ -1,5 +1,4 @@
 const express = require('express');
-const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const contractValidation = require('../../validations/contract.validation');
 const contractController = require('../../controllers/contract.controller');
@@ -8,14 +7,14 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageContracts'), validate(contractValidation.createContract), contractController.createContract)
-  .get(auth('getContracts'), validate(contractValidation.getContracts), contractController.getContracts);
+  .post(validate(contractValidation.createContract), contractController.createContract)
+  .get(validate(contractValidation.getContracts), contractController.getContracts);
 
 router
   .route('/:contractId')
-  .get(auth('getContracts'), validate(contractValidation.getContract), contractController.getContract)
-  .patch(auth('manageContracts'), validate(contractValidation.updateContract), contractController.updateContract)
-  .delete(auth('manageContracts'), validate(contractValidation.deleteContract), contractController.deleteContract);
+  .get(validate(contractValidation.getContract), contractController.getContract)
+  .patch(validate(contractValidation.updateContract), contractController.updateContract)
+  .delete(validate(contractValidation.deleteContract), contractController.deleteContract);
 
 module.exports = router;
 

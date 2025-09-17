@@ -32,7 +32,7 @@ const getPropertyById = async (id) => Property.findByPk(id);
 
 const updatePropertyById = async (id, updateBody) => {
   const property = await getPropertyById(id);
-  if (!property) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy tài sản');
+  if (!property) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy nhà trọ');
   Object.assign(property, updateBody);
   await property.save();
   return property;
@@ -40,7 +40,7 @@ const updatePropertyById = async (id, updateBody) => {
 
 const deletePropertyById = async (id) => {
   const property = await getPropertyById(id);
-  if (!property) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy tài sản');
+  if (!property) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy nhà trọ');
 
   // Start a transaction to ensure all deletions succeed or fail together
   const transaction = await Property.sequelize.transaction();
@@ -158,7 +158,7 @@ module.exports = {
    */
   getPropertyDashboardById: async (propertyId) => {
     const property = await Property.findByPk(propertyId);
-    if (!property) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy tài sản');
+    if (!property) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy nhà trọ');
 
     // General info
     const totalRooms = await Room.count({ where: { propertyId } });

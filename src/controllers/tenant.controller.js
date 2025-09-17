@@ -27,7 +27,7 @@ const getTenant = catchAsync(async (req, res) => {
   }
   if (req.params.propertyId) {
     const belongs = await tenantService.tenantBelongsToProperty(req.params.tenantId, req.params.propertyId);
-    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong tài sản này' });
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong nhà trọ này' });
   }
   res.send(tenant);
 });
@@ -35,7 +35,7 @@ const getTenant = catchAsync(async (req, res) => {
 const updateTenant = catchAsync(async (req, res) => {
   if (req.params.propertyId) {
     const belongs = await tenantService.tenantBelongsToProperty(req.params.tenantId, req.params.propertyId);
-    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong tài sản này' });
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong nhà trọ này' });
   }
   const tenant = await tenantService.updateTenantById(req.params.tenantId, req.body);
   res.send(tenant);
@@ -44,7 +44,7 @@ const updateTenant = catchAsync(async (req, res) => {
 const deleteTenant = catchAsync(async (req, res) => {
   if (req.params.propertyId) {
     const belongs = await tenantService.tenantBelongsToProperty(req.params.tenantId, req.params.propertyId);
-    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong tài sản này' });
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy người thuê trong nhà trọ này' });
   }
   await tenantService.deleteTenantById(req.params.tenantId);
   res.status(httpStatus.NO_CONTENT).send();

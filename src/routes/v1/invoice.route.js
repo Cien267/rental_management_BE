@@ -1,5 +1,4 @@
 const express = require('express');
-const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const invoiceValidation = require('../../validations/invoice.validation');
 const invoiceController = require('../../controllers/invoice.controller');
@@ -8,14 +7,14 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageInvoices'), validate(invoiceValidation.createInvoice), invoiceController.createInvoice)
-  .get(auth('getInvoices'), validate(invoiceValidation.getInvoices), invoiceController.getInvoices);
+  .post(validate(invoiceValidation.createInvoice), invoiceController.createInvoice)
+  .get(validate(invoiceValidation.getInvoices), invoiceController.getInvoices);
 
 router
   .route('/:invoiceId')
-  .get(auth('getInvoices'), validate(invoiceValidation.getInvoice), invoiceController.getInvoice)
-  .patch(auth('manageInvoices'), validate(invoiceValidation.updateInvoice), invoiceController.updateInvoice)
-  .delete(auth('manageInvoices'), validate(invoiceValidation.deleteInvoice), invoiceController.deleteInvoice);
+  .get(validate(invoiceValidation.getInvoice), invoiceController.getInvoice)
+  .patch(validate(invoiceValidation.updateInvoice), invoiceController.updateInvoice)
+  .delete(validate(invoiceValidation.deleteInvoice), invoiceController.deleteInvoice);
 
 module.exports = router;
 

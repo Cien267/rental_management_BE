@@ -27,7 +27,7 @@ const getContract = catchAsync(async (req, res) => {
   }
   if (req.params.propertyId) {
     const belongs = await contractService.contractBelongsToProperty(req.params.contractId, req.params.propertyId);
-    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong tài sản này' });
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong nhà trọ này' });
   }
   res.send(contract);
 });
@@ -35,7 +35,7 @@ const getContract = catchAsync(async (req, res) => {
 const updateContract = catchAsync(async (req, res) => {
   if (req.params.propertyId) {
     const belongs = await contractService.contractBelongsToProperty(req.params.contractId, req.params.propertyId);
-    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong tài sản này' });
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong nhà trọ này' });
   }
   const contract = await contractService.updateContractById(req.params.contractId, req.body);
   res.send(contract);
@@ -44,7 +44,7 @@ const updateContract = catchAsync(async (req, res) => {
 const deleteContract = catchAsync(async (req, res) => {
   if (req.params.propertyId) {
     const belongs = await contractService.contractBelongsToProperty(req.params.contractId, req.params.propertyId);
-    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong tài sản này' });
+    if (!belongs) return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy hợp đồng trong nhà trọ này' });
   }
   await contractService.deleteContractById(req.params.contractId);
   res.status(httpStatus.NO_CONTENT).send();

@@ -1,5 +1,4 @@
 const express = require('express');
-const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const paymentValidation = require('../../validations/payment.validation');
 const paymentController = require('../../controllers/payment.controller');
@@ -8,14 +7,14 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('managePayments'), validate(paymentValidation.createPayment), paymentController.createPayment)
-  .get(auth('getPayments'), validate(paymentValidation.getPayments), paymentController.getPayments);
+  .post(validate(paymentValidation.createPayment), paymentController.createPayment)
+  .get(validate(paymentValidation.getPayments), paymentController.getPayments);
 
 router
   .route('/:paymentId')
-  .get(auth('getPayments'), validate(paymentValidation.getPayment), paymentController.getPayment)
-  .patch(auth('managePayments'), validate(paymentValidation.updatePayment), paymentController.updatePayment)
-  .delete(auth('managePayments'), validate(paymentValidation.deletePayment), paymentController.deletePayment);
+  .get(validate(paymentValidation.getPayment), paymentController.getPayment)
+  .patch(validate(paymentValidation.updatePayment), paymentController.updatePayment)
+  .delete(validate(paymentValidation.deletePayment), paymentController.deletePayment);
 
 module.exports = router;
 

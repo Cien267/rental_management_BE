@@ -21,7 +21,7 @@ const getRoom = catchAsync(async (req, res) => {
     return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng' });
   }
   if (req.params.propertyId && Number(room.propertyId) !== Number(req.params.propertyId)) {
-    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng trong tài sản này' });
+    return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng trong nhà trọ này' });
   }
   res.send(room);
 });
@@ -30,7 +30,7 @@ const updateRoom = catchAsync(async (req, res) => {
   if (req.params.propertyId) {
     const existing = await roomService.getRoomById(req.params.roomId);
     if (!existing || Number(existing.propertyId) !== Number(req.params.propertyId)) {
-      return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng trong tài sản này' });
+      return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng trong nhà trọ này' });
     }
   }
   const room = await roomService.updateRoomById(req.params.roomId, req.body);
@@ -41,7 +41,7 @@ const deleteRoom = catchAsync(async (req, res) => {
   if (req.params.propertyId) {
     const existing = await roomService.getRoomById(req.params.roomId);
     if (!existing || Number(existing.propertyId) !== Number(req.params.propertyId)) {
-      return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng trong tài sản này' });
+      return res.status(httpStatus.NOT_FOUND).send({ message: 'Không tìm thấy phòng trong nhà trọ này' });
     }
   }
   await roomService.deleteRoomById(req.params.roomId);

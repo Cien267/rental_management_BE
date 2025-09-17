@@ -1,5 +1,4 @@
 const express = require('express');
-const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const extraFeeValidation = require('../../validations/extraFee.validation');
 const extraFeeController = require('../../controllers/extraFee.controller');
@@ -8,14 +7,14 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageProperties'), validate(extraFeeValidation.createExtraFee), extraFeeController.createExtraFee)
-  .get(auth('getProperties'), validate(extraFeeValidation.getExtraFees), extraFeeController.getExtraFees);
+  .post(validate(extraFeeValidation.createExtraFee), extraFeeController.createExtraFee)
+  .get(validate(extraFeeValidation.getExtraFees), extraFeeController.getExtraFees);
 
 router
   .route('/:extraFeeId')
-  .get(auth('getProperties'), validate(extraFeeValidation.getExtraFee), extraFeeController.getExtraFee)
-  .patch(auth('manageProperties'), validate(extraFeeValidation.updateExtraFee), extraFeeController.updateExtraFee)
-  .delete(auth('manageProperties'), validate(extraFeeValidation.deleteExtraFee), extraFeeController.deleteExtraFee);
+  .get(validate(extraFeeValidation.getExtraFee), extraFeeController.getExtraFee)
+  .patch(validate(extraFeeValidation.updateExtraFee), extraFeeController.updateExtraFee)
+  .delete(validate(extraFeeValidation.deleteExtraFee), extraFeeController.deleteExtraFee);
 
 module.exports = router;
 
