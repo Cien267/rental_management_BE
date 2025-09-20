@@ -12,8 +12,15 @@ const queryContracts = async (filter, options) => {
     const [field, direction] = sortBy.split(':');
     order.push([field, direction === 'desc' ? 'DESC' : 'ASC']);
   }
+
+  // Build where clause with equal for all contract fields (roomId, tenantId, status)
+  const whereClause = {};
+  if (filter.roomId) whereClause.roomId = filter.roomId;
+  if (filter.tenantId) whereClause.tenantId = filter.tenantId;
+  if (filter.status) whereClause.status = filter.status;
+
   const { count, rows } = await Contract.findAndCountAll({
-    where: filter,
+    where: whereClause,
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,

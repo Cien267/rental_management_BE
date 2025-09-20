@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
-const { Room } = require('../models');
+const { Op } = require('sequelize');
+const { Room, Tenant } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 const createRoom = async (body) => Room.create(body);
@@ -11,9 +12,20 @@ const queryRooms = async (filter, options) => {
   if (sortBy) {
     const [field, direction] = sortBy.split(':');
     order.push([field, direction === 'desc' ? 'DESC' : 'ASC']);
+  } else {
+    order.push(['createdAt', 'DESC']);
   }
+
+  // Build where clause with LIKE for text fields and equal for enum fields
+  const whereClause = {};
+  if (filter.propertyId) whereClause.propertyId = filter.propertyId;
+  if (filter.name) whereClause.name = { [Op.like]: `%${filter.name}%` };
+  if (filter.status) whereClause.status = filter.status;
+
   const { count, rows } = await Room.findAndCountAll({
-    where: filter,
+    where: whereClause,
+    include: [{ model: Tenant, as: 'tenants' }],
+    distinct: true,
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,
@@ -27,7 +39,7 @@ const queryRooms = async (filter, options) => {
   };
 };
 
-const getRoomById = async (id) => Room.findByPk(id);
+const getRoomById = async (id) => Room.findByPk(id, { include: [{ model: Tenant, as: 'tenants' }] });
 
 const updateRoomById = async (id, updateBody) => {
   const room = await getRoomById(id);
@@ -40,6 +52,8 @@ const updateRoomById = async (id, updateBody) => {
 const deleteRoomById = async (id) => {
   const room = await getRoomById(id);
   if (!room) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng');
+  // If room has tenants, set their roomId to null before deleting the room
+  await Tenant.update({ roomId: null }, { where: { roomId: id } });
   await room.destroy();
   return room;
 };

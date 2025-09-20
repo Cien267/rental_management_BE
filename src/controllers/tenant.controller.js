@@ -4,18 +4,17 @@ const catchAsync = require('../utils/catchAsync');
 const { tenantService } = require('../services');
 
 const createTenant = catchAsync(async (req, res) => {
+  const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
+  req.body.propertyId = propertyId;
   const tenant = await tenantService.createTenant(req.body);
   res.status(httpStatus.CREATED).send(tenant);
 });
 
 const getTenants = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  if (req.params.propertyId || req.query.propertyId) {
-    const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
-    const result = await tenantService.queryTenantsByPropertyId(propertyId, options);
-    return res.send(result);
-  }
-  const filter = pick(req.query, ['fullName', 'phone', 'email', 'idNumber']);
+  const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
+  const filter = pick(req.query, ['fullName', 'phone', 'email', 'roomId', 'gender']);
+  filter.propertyId = propertyId;
   const result = await tenantService.queryTenants(filter, options);
   return res.send(result);
 });

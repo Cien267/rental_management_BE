@@ -61,9 +61,8 @@ components:
           type: string
           format: email
           maxLength: 150
-        idNumber:
-          type: string
-          maxLength: 50
+        roomId:
+          type: integer
         permanentAddress:
           type: string
           maxLength: 255
@@ -94,7 +93,7 @@ components:
         fullName: Jane Doe
         phone: '+84 912 000 111'
         email: jane@example.com
-        idNumber: 012345678
+        roomId: 1
         permanentAddress: 123 Main St, District 1, HCMC
         nationalIdNumber: 123456789
         emergencyContactName: John Doe
@@ -118,9 +117,8 @@ components:
           type: string
           format: email
           maxLength: 150
-        idNumber:
-          type: string
-          maxLength: 50
+        roomId:
+          type: integer
         permanentAddress:
           type: string
           maxLength: 255

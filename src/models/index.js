@@ -31,6 +31,14 @@ Contract.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
 Tenant.hasMany(Contract, { foreignKey: 'tenantId', as: 'contracts' });
 Contract.belongsTo(Tenant, { foreignKey: 'tenantId', as: 'tenant' });
 
+// Room -> Tenants
+Room.hasMany(Tenant, { foreignKey: 'roomId', as: 'tenants' });
+Tenant.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
+
+// Property -> Tenants
+Property.hasMany(Tenant, { foreignKey: 'propertyId', as: 'tenants' });
+Tenant.belongsTo(Property, { foreignKey: 'propertyId', as: 'property' });
+
 // Property/Room -> UtilityMeters
 Property.hasMany(UtilityMeter, { foreignKey: 'propertyId', as: 'utilityMeters' });
 UtilityMeter.belongsTo(Property, { foreignKey: 'propertyId', as: 'property' });

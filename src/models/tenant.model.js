@@ -21,8 +21,12 @@ const Tenant = sequelize.define(
       type: DataTypes.STRING(150),
       allowNull: true,
     },
-    idNumber: {
-      type: DataTypes.STRING(50),
+    roomId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    propertyId: {
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
     permanentAddress: {

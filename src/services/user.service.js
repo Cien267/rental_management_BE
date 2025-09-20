@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { Op } = require('sequelize');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
@@ -33,8 +34,13 @@ const queryUsers = async (filter, options) => {
     order.push([field, direction === 'desc' ? 'DESC' : 'ASC']);
   }
 
+  // Build where clause with LIKE for text fields and equal for enum fields
+  const whereClause = {};
+  if (filter.name) whereClause.name = { [Op.like]: `%${filter.name}%` };
+  if (filter.role) whereClause.role = filter.role;
+
   const { count, rows } = await User.findAndCountAll({
-    where: filter,
+    where: whereClause,
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,

@@ -13,8 +13,15 @@ const queryProperties = async (filter, options) => {
     const [field, direction] = sortBy.split(':');
     order.push([field, direction === 'desc' ? 'DESC' : 'ASC']);
   }
+
+  // Build where clause with LIKE for text fields and equal for enum fields
+  const whereClause = {};
+  if (filter.userId) whereClause.userId = filter.userId;
+  if (filter.name) whereClause.name = { [Op.like]: `%${filter.name}%` };
+  if (filter.type) whereClause.type = filter.type;
+
   const { count, rows } = await Property.findAndCountAll({
-    where: filter,
+    where: whereClause,
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,
