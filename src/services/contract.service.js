@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { Contract, Room } = require('../models');
+const { Contract, Room, Tenant } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 const createContract = async (body) => Contract.create(body);
@@ -15,12 +15,17 @@ const queryContracts = async (filter, options) => {
 
   // Build where clause with equal for all contract fields (roomId, tenantId, status)
   const whereClause = {};
+  if (filter.propertyId) whereClause.propertyId = filter.propertyId;
   if (filter.roomId) whereClause.roomId = filter.roomId;
   if (filter.tenantId) whereClause.tenantId = filter.tenantId;
   if (filter.status) whereClause.status = filter.status;
 
   const { count, rows } = await Contract.findAndCountAll({
     where: whereClause,
+    include: [
+      { model: Room, as: 'room' },
+      { model: Tenant, as: 'tenant' },
+    ],
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,

@@ -6,6 +6,7 @@ const createContract = {
     tenantId: Joi.number().integer().required(),
     startDate: Joi.date().required(),
     endDate: Joi.date().allow(null),
+    propertyId: Joi.number().integer(),
     depositAmount: Joi.number().precision(2).min(0).allow(null),
     paymentCycle: Joi.string().valid('monthly', 'quarterly', 'yearly').default('monthly'),
     status: Joi.string().valid('active', 'ended', 'cancelled').allow(null),
@@ -16,6 +17,7 @@ const getContracts = {
   query: Joi.object().keys({
     roomId: Joi.number().integer(),
     tenantId: Joi.number().integer(),
+    propertyId: Joi.number().integer(),
     status: Joi.string(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
@@ -38,6 +40,7 @@ const updateContract = {
       roomId: Joi.number().integer(),
       tenantId: Joi.number().integer(),
       startDate: Joi.date(),
+      propertyId: Joi.number().integer(),
       endDate: Joi.date().allow(null),
       depositAmount: Joi.number().precision(2).min(0).allow(null),
       paymentCycle: Joi.string().valid('monthly', 'quarterly', 'yearly'),

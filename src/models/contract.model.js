@@ -38,6 +38,10 @@ const Contract = sequelize.define(
       type: DataTypes.ENUM('active', 'ended', 'cancelled'),
       defaultValue: 'active',
     },
+    propertyId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,
