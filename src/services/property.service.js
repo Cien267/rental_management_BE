@@ -1,6 +1,16 @@
 const httpStatus = require('http-status');
 const { Op, fn, col } = require('sequelize');
-const { Property, Room, Contract, Invoice, Payment, UtilityMeter, UtilityMeterReading, ExtraFee } = require('../models');
+const {
+  Property,
+  Room,
+  Contract,
+  Invoice,
+  Tenant,
+  Payment,
+  UtilityMeter,
+  UtilityMeterReading,
+  ExtraFee,
+} = require('../models');
 const ApiError = require('../utils/ApiError');
 
 const createProperty = async (body) => Property.create(body);
@@ -22,6 +32,10 @@ const queryProperties = async (filter, options) => {
 
   const { count, rows } = await Property.findAndCountAll({
     where: whereClause,
+    include: [
+      { model: Room, as: 'rooms' },
+      { model: Tenant, as: 'tenants' },
+    ],
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,
@@ -284,6 +298,10 @@ module.exports = {
                 status: 'active',
                 endDate: { [Op.ne]: null, [Op.between]: [now, in30Days] },
               },
+              include: [
+                { model: Room, as: 'room' },
+                { model: Tenant, as: 'tenant' },
+              ],
               order: [['endDate', 'ASC']],
             })
           : [],
