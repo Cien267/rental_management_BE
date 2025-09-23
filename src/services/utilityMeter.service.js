@@ -1,8 +1,29 @@
 const httpStatus = require('http-status');
 const { UtilityMeter } = require('../models');
 const ApiError = require('../utils/ApiError');
+const { Room } = require('../models');
 
-const createUtilityMeter = async (body) => UtilityMeter.create(body);
+const createUtilityMeter = async (body) => {
+  const data = { ...body };
+  delete data.applyAll;
+
+  if (body.applyAll) {
+    const propertyId = body.propertyId || 0;
+
+    const roomIds = await Room.findAll({
+      where: { propertyId },
+      attributes: ['id'],
+      raw: true,
+    });
+
+    if (roomIds.length > 0) {
+      // bulk create in parallel
+      await Promise.all(roomIds.map(({ id }) => UtilityMeter.create({ ...data, roomId: id })));
+    }
+  } else {
+    await UtilityMeter.create(data);
+  }
+};
 
 const queryUtilityMeters = async (filter, options) => {
   const { limit = 10, page = 1, sortBy } = options;
@@ -14,6 +35,7 @@ const queryUtilityMeters = async (filter, options) => {
   }
   const { count, rows } = await UtilityMeter.findAndCountAll({
     where: filter,
+    include: [{ model: Room, as: 'room' }],
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,

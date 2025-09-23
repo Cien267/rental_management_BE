@@ -1,5 +1,4 @@
 const express = require('express');
-const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const utilityMeterValidation = require('../../validations/utilityMeter.validation');
 const utilityMeterController = require('../../controllers/utilityMeter.controller');
@@ -8,26 +7,14 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(
-    auth('manageUtilityMeters'),
-    validate(utilityMeterValidation.createUtilityMeter),
-    utilityMeterController.createUtilityMeter
-  )
-  .get(auth('getUtilityMeters'), validate(utilityMeterValidation.getUtilityMeters), utilityMeterController.getUtilityMeters);
+  .post(validate(utilityMeterValidation.createUtilityMeter), utilityMeterController.createUtilityMeter)
+  .get(validate(utilityMeterValidation.getUtilityMeters), utilityMeterController.getUtilityMeters);
 
 router
   .route('/:utilityMeterId')
-  .get(auth('getUtilityMeters'), validate(utilityMeterValidation.getUtilityMeter), utilityMeterController.getUtilityMeter)
-  .patch(
-    auth('manageUtilityMeters'),
-    validate(utilityMeterValidation.updateUtilityMeter),
-    utilityMeterController.updateUtilityMeter
-  )
-  .delete(
-    auth('manageUtilityMeters'),
-    validate(utilityMeterValidation.deleteUtilityMeter),
-    utilityMeterController.deleteUtilityMeter
-  );
+  .get(validate(utilityMeterValidation.getUtilityMeter), utilityMeterController.getUtilityMeter)
+  .patch(validate(utilityMeterValidation.updateUtilityMeter), utilityMeterController.updateUtilityMeter)
+  .delete(validate(utilityMeterValidation.deleteUtilityMeter), utilityMeterController.deleteUtilityMeter);
 
 module.exports = router;
 

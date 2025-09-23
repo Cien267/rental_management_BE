@@ -10,6 +10,8 @@ const tenantController = require('../../controllers/tenant.controller');
 const contractController = require('../../controllers/contract.controller');
 const extraFeeController = require('../../controllers/extraFee.controller');
 const invoiceController = require('../../controllers/invoice.controller');
+const utilityMeterValidation = require('../../validations/utilityMeter.validation');
+const utilityMeterController = require('../../controllers/utilityMeter.controller');
 
 const router = express.Router({ mergeParams: true });
 
@@ -96,5 +98,23 @@ router
   .get(validate(invoiceValidation.getInvoice), invoiceController.getInvoice)
   .patch(validate(invoiceValidation.updateInvoice), invoiceController.updateInvoice)
   .delete(validate(invoiceValidation.deleteInvoice), invoiceController.deleteInvoice);
+
+// Utility Meters (scoped by property)
+router
+  .route('/:propertyId/utility-meters')
+  .post(validate(utilityMeterValidation.createUtilityMeter), (req, res, next) => {
+    req.body.propertyId = parseInt(req.params.propertyId, 10);
+    return utilityMeterController.createUtilityMeter(req, res, next);
+  })
+  .get((req, res, next) => {
+    req.query.propertyId = parseInt(req.params.propertyId, 10);
+    return utilityMeterController.getUtilityMeters(req, res, next);
+  });
+
+router
+  .route('/:propertyId/utility-meters/:utilityMeterId')
+  .get(validate(utilityMeterValidation.getUtilityMeter), utilityMeterController.getUtilityMeter)
+  .patch(validate(utilityMeterValidation.updateUtilityMeter), utilityMeterController.updateUtilityMeter)
+  .delete(validate(utilityMeterValidation.deleteUtilityMeter), utilityMeterController.deleteUtilityMeter);
 
 module.exports = router;
