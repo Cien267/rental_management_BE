@@ -1,5 +1,4 @@
 const express = require('express');
-const auth = require('../../middlewares/auth');
 const validate = require('../../middlewares/validate');
 const readingValidation = require('../../validations/utilityMeterReading.validation');
 const readingController = require('../../controllers/utilityMeterReading.controller');
@@ -8,14 +7,14 @@ const router = express.Router();
 
 router
   .route('/')
-  .post(auth('manageUtilityMeters'), validate(readingValidation.createReading), readingController.createReading)
-  .get(auth('getUtilityMeters'), validate(readingValidation.getReadings), readingController.getReadings);
+  .post(validate(readingValidation.createReading), readingController.createReading)
+  .get(validate(readingValidation.getReadings), readingController.getReadings);
 
 router
   .route('/:readingId')
-  .get(auth('getUtilityMeters'), validate(readingValidation.getReading), readingController.getReading)
-  .patch(auth('manageUtilityMeters'), validate(readingValidation.updateReading), readingController.updateReading)
-  .delete(auth('manageUtilityMeters'), validate(readingValidation.deleteReading), readingController.deleteReading);
+  .get(validate(readingValidation.getReading), readingController.getReading)
+  .patch(validate(readingValidation.updateReading), readingController.updateReading)
+  .delete(validate(readingValidation.deleteReading), readingController.deleteReading);
 
 module.exports = router;
 
