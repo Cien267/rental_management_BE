@@ -13,10 +13,12 @@ const queryReadings = async (filter, options) => {
     order.push([field, direction === 'desc' ? 'DESC' : 'ASC']);
   }
 
-  // Build where clause with equal for all reading fields (utilityMeterId, readingDate)
+  // Build where clause with equal for all reading fields (utilityMeterId, readingDate, propertyId, roomId)
   const whereClause = {};
   if (filter.utilityMeterId) whereClause.utilityMeterId = filter.utilityMeterId;
   if (filter.readingDate) whereClause.readingDate = filter.readingDate;
+  if (filter.propertyId) whereClause.propertyId = filter.propertyId;
+  if (filter.roomId) whereClause.roomId = filter.roomId;
 
   const { count, rows } = await UtilityMeterReading.findAndCountAll({
     where: whereClause,

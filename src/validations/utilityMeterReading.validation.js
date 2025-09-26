@@ -5,6 +5,8 @@ const createReading = {
     utilityMeterId: Joi.number().integer().required(),
     readingDate: Joi.date().required(),
     value: Joi.number().precision(2).allow(null),
+    propertyId: Joi.number().integer().required(),
+    roomId: Joi.number().integer().allow(null),
   }),
 };
 
@@ -12,6 +14,8 @@ const getReadings = {
   query: Joi.object().keys({
     utilityMeterId: Joi.number().integer(),
     readingDate: Joi.date(),
+    propertyId: Joi.number().integer(),
+    roomId: Joi.number().integer(),
     sortBy: Joi.string(),
     limit: Joi.number().integer(),
     page: Joi.number().integer(),
@@ -33,6 +37,8 @@ const updateReading = {
       utilityMeterId: Joi.number().integer(),
       readingDate: Joi.date(),
       value: Joi.number().precision(2).allow(null),
+      propertyId: Joi.number().integer(),
+      roomId: Joi.number().integer().allow(null),
     })
     .min(1),
 };

@@ -21,6 +21,14 @@ const UtilityMeterReading = sequelize.define(
       type: DataTypes.DECIMAL(12, 2),
       allowNull: true,
     },
+    propertyId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    roomId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

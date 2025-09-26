@@ -49,6 +49,12 @@ UtilityMeter.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
 UtilityMeter.hasMany(UtilityMeterReading, { foreignKey: 'utilityMeterId', as: 'readings' });
 UtilityMeterReading.belongsTo(UtilityMeter, { foreignKey: 'utilityMeterId', as: 'meter' });
 
+// Property/Room -> UtilityMeterReadings
+Property.hasMany(UtilityMeterReading, { foreignKey: 'propertyId', as: 'utilityMeterReadings' });
+UtilityMeterReading.belongsTo(Property, { foreignKey: 'propertyId', as: 'property' });
+Room.hasMany(UtilityMeterReading, { foreignKey: 'roomId', as: 'utilityMeterReadings' });
+UtilityMeterReading.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
+
 // Property -> ExtraFees
 Property.hasMany(ExtraFee, { foreignKey: 'propertyId', as: 'extraFees' });
 ExtraFee.belongsTo(Property, { foreignKey: 'propertyId', as: 'property' });

@@ -9,7 +9,7 @@ const createReading = catchAsync(async (req, res) => {
 });
 
 const getReadings = catchAsync(async (req, res) => {
-  const filter = pick(req.query, ['utilityMeterId', 'readingDate']);
+  const filter = pick(req.query, ['utilityMeterId', 'readingDate', 'propertyId', 'roomId']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await utilityMeterReadingService.queryReadings(filter, options);
   res.send(result);
