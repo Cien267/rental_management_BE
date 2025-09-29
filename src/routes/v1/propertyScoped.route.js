@@ -147,4 +147,15 @@ router
     return readingController.getReadings(req, res, next);
   });
 
+// Bulk create readings by property
+router
+  .route('/:propertyId/utility-meters-readings-multiple-create')
+  .post(validate(readingValidation.createReadingsBulk), (req, res, next) => {
+    const propertyId = parseInt(req.params.propertyId, 10);
+    if (Array.isArray(req.body)) {
+      req.body = req.body.map((item) => ({ ...item, propertyId }));
+    }
+    return readingController.createReadingsBulk(req, res, next);
+  });
+
 module.exports = router;

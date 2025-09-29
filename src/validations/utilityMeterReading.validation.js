@@ -49,10 +49,26 @@ const deleteReading = {
   }),
 };
 
+const createReadingsBulk = {
+  body: Joi.array()
+    .items(
+      Joi.object().keys({
+        utilityMeterId: Joi.number().integer().required(),
+        readingDate: Joi.date().required(),
+        value: Joi.number().precision(2).allow(null),
+        propertyId: Joi.number().integer().required(),
+        roomId: Joi.number().integer().allow(null),
+      })
+    )
+    .min(1)
+    .required(),
+};
+
 module.exports = {
   createReading,
   getReadings,
   getReading,
   updateReading,
   deleteReading,
+  createReadingsBulk,
 };

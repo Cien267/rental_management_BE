@@ -8,6 +8,12 @@ const createReading = catchAsync(async (req, res) => {
   res.status(httpStatus.CREATED).send(reading);
 });
 
+const createReadingsBulk = catchAsync(async (req, res) => {
+  const readingsPayload = Array.isArray(req.body) ? req.body : [];
+  const created = await utilityMeterReadingService.createReadingsBulk(readingsPayload);
+  res.status(httpStatus.CREATED).send({ count: created.length, results: created });
+});
+
 const getReadings = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['utilityMeterId', 'readingDate', 'propertyId', 'roomId']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -35,6 +41,7 @@ const deleteReading = catchAsync(async (req, res) => {
 
 module.exports = {
   createReading,
+  createReadingsBulk,
   getReadings,
   getReading,
   updateReading,

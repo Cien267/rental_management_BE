@@ -4,6 +4,13 @@ const ApiError = require('../utils/ApiError');
 
 const createReading = async (body) => UtilityMeterReading.create(body);
 
+const createReadingsBulk = async (readings) => {
+  if (!Array.isArray(readings) || readings.length === 0) return [];
+  // Use validate: true to run model-level validations; individual hooks are not needed here
+  const created = await UtilityMeterReading.bulkCreate(readings, { validate: true, returning: true });
+  return created;
+};
+
 const queryReadings = async (filter, options) => {
   const { limit = 10, page = 1, sortBy } = options;
   const offset = (page - 1) * limit;
@@ -54,6 +61,7 @@ const deleteReadingById = async (id) => {
 
 module.exports = {
   createReading,
+  createReadingsBulk,
   queryReadings,
   getReadingById,
   updateReadingById,
