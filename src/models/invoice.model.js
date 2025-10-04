@@ -71,6 +71,14 @@ const Invoice = sequelize.define(
       type: DataTypes.JSON,
       allowNull: true,
     },
+    month: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    year: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
   },
   {
     timestamps: true,

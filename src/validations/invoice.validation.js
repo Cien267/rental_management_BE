@@ -2,7 +2,7 @@ const Joi = require('joi');
 
 const createInvoice = {
   body: Joi.object().keys({
-    propertyId: Joi.number().integer().required(),
+    propertyId: Joi.number().integer().required().optional(),
     roomId: Joi.number().integer().required(),
     month: Joi.number().integer().min(1).max(12).required(),
     year: Joi.number().integer().min(2000).max(3000).required(),

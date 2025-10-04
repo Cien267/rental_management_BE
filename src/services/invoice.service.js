@@ -13,10 +13,10 @@ const createInvoice = async (body) => {
 
   // Get active contract for this room
   const contract = await Contract.findOne({
-    where: { 
+    where: {
       roomId,
-      status: 'active'
-    }
+      status: 'active',
+    },
   });
   if (!contract) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy hợp đồng hoạt động cho phòng này');
@@ -30,35 +30,35 @@ const createInvoice = async (body) => {
 
   // 3. Calculate utilities amount and breakdown
   let utilitiesAmount = 0;
-  let utilitiesBreakdown = [];
+  const utilitiesBreakdown = [];
 
   // Get utility meters for this room
   const utilityMeters = await UtilityMeter.findAll({
-    where: { 
+    where: {
       roomId,
-      active: true 
-    }
+      active: true,
+    },
   });
 
-  for (const meter of utilityMeters) {
+  utilityMeters.forEach(async (meter) => {
     // Get 2 latest readings for this meter
     const readings = await UtilityMeterReading.findAll({
       where: { utilityMeterId: meter.id },
       order: [['readingDate', 'DESC']],
-      limit: 2
+      limit: 2,
     });
 
     if (readings.length >= 2) {
-      const latestReading = readings[0].value;
-      const previousReading = readings[1].value;
-      const usage = latestReading - previousReading;
+      const latestReading = Number(readings[0].value);
+      const previousReading = Number(readings[1].value);
+      const usage = Number(latestReading - previousReading);
 
       // Get price per unit based on meter type
       let pricePerUnit = 0;
       if (meter.meterType === 'electricity') {
-        pricePerUnit = property.electricityPricePerKwh || 0;
+        pricePerUnit = Number(property.electricityPricePerKwh || 0);
       } else if (meter.meterType === 'water') {
-        pricePerUnit = property.waterPricePerM3 || 0;
+        pricePerUnit = Number(property.waterPricePerM3 || 0);
       }
 
       const total = usage * pricePerUnit;
@@ -68,40 +68,42 @@ const createInvoice = async (body) => {
         meterType: meter.meterType,
         meterId: meter.id,
         unit: meter.unit,
-        previousReading: previousReading,
-        latestReading: latestReading,
-        usage: usage,
-        pricePerUnit: pricePerUnit,
-        total: total
+        previousReading,
+        latestReading,
+        usage,
+        pricePerUnit,
+        total,
       });
+    } else {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Bạn chưa có đủ thông tin số đo công tơ để tạo hóa đơn');
     }
-  }
+  });
 
   // 4. Calculate extra fees amount and breakdown
   let extraFeesAmount = 0;
-  let extraFeesBreakdown = [];
+  const extraFeesBreakdown = [];
 
   const extraFees = await ExtraFee.findAll({
     where: {
       propertyId,
       isActive: true,
-      chargeType: 'monthly'
-    }
+      chargeType: 'monthly',
+    },
   });
 
-  for (const fee of extraFees) {
-    extraFeesAmount += fee.amount;
+  extraFees.forEach((fee) => {
+    extraFeesAmount += Number(fee.amount || 0);
     extraFeesBreakdown.push({
       id: fee.id,
       name: fee.name,
       description: fee.description,
       amount: fee.amount,
-      chargeType: fee.chargeType
+      chargeType: fee.chargeType,
     });
-  }
+  });
 
   // 5. Calculate total amount
-  const rentAmount = room.price;
+  const rentAmount = Number(room.rentAmount || 0);
   const totalAmount = rentAmount + utilitiesAmount + extraFeesAmount;
 
   // 6. Create invoice
@@ -119,7 +121,9 @@ const createInvoice = async (body) => {
     status: 'unpaid', // Auto set to unpaid
     notes,
     utilitiesBreakdown,
-    extraFeesBreakdown
+    extraFeesBreakdown,
+    month: month || new Date().getMonth() + 1,
+    year: year || new Date().getFullYear(),
   };
 
   return Invoice.create(invoiceData);
@@ -133,10 +137,10 @@ const queryInvoices = async (filter, options) => {
     const [field, direction] = sortBy.split(':');
     order.push([field, direction === 'desc' ? 'DESC' : 'ASC']);
   }
-  
+
   // Support filtering by propertyId and roomId directly
   const whereClause = { ...filter };
-  
+
   const { count, rows } = await Invoice.findAndCountAll({
     where: whereClause,
     limit: parseInt(limit, 10),

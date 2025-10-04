@@ -38,13 +38,11 @@ module.exports = {
     });
     await queryInterface.addColumn('Invoices', 'notes', { type: Sequelize.TEXT, allowNull: true });
 
-    // Replace totalAmount with generated column
-    try {
-      await queryInterface.removeColumn('Invoices', 'totalAmount');
-    } catch (e) {}
-    await queryInterface.sequelize.query(
-      'ALTER TABLE `Invoices` ADD COLUMN `totalAmount` DECIMAL(12,2) AS (rentAmount + utilitiesAmount + extraFeesAmount) STORED'
-    );
+    await queryInterface.addColumn('Invoices', 'totalAmount', {
+      type: Sequelize.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    });
 
     // Update status enum to include 'partially_paid'
     await queryInterface.changeColumn('Invoices', 'status', {
