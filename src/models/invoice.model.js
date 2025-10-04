@@ -13,6 +13,14 @@ const Invoice = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    propertyId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    roomId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     invoiceDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
@@ -53,6 +61,14 @@ const Invoice = sequelize.define(
     },
     notes: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    utilitiesBreakdown: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
+    extraFeesBreakdown: {
+      type: DataTypes.JSON,
       allowNull: true,
     },
   },

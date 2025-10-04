@@ -63,6 +63,14 @@ ExtraFee.belongsTo(Property, { foreignKey: 'propertyId', as: 'property' });
 Contract.hasMany(Invoice, { foreignKey: 'contractId', as: 'invoices' });
 Invoice.belongsTo(Contract, { foreignKey: 'contractId', as: 'contract' });
 
+// Property -> Invoices
+Property.hasMany(Invoice, { foreignKey: 'propertyId', as: 'invoices' });
+Invoice.belongsTo(Property, { foreignKey: 'propertyId', as: 'property' });
+
+// Room -> Invoices
+Room.hasMany(Invoice, { foreignKey: 'roomId', as: 'invoices' });
+Invoice.belongsTo(Room, { foreignKey: 'roomId', as: 'room' });
+
 // Invoice -> Payments
 Invoice.hasMany(Payment, { foreignKey: 'invoiceId', as: 'payments' });
 Payment.belongsTo(Invoice, { foreignKey: 'invoiceId', as: 'invoice' });
