@@ -18,6 +18,8 @@ const queryReadings = async (filter, options) => {
   if (sortBy) {
     const [field, direction] = sortBy.split(':');
     order.push([field, direction === 'desc' ? 'DESC' : 'ASC']);
+  } else {
+    order.push(['id', 'DESC']);
   }
 
   // Build where clause with equal for all reading fields (utilityMeterId, readingDate, propertyId, roomId)
