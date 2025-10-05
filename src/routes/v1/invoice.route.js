@@ -8,7 +8,7 @@ const router = express.Router();
 router
   .route('/')
   .post(validate(invoiceValidation.createInvoice), invoiceController.createInvoice)
-  .get(validate(invoiceValidation.getInvoices), invoiceController.getInvoices);
+  .get(invoiceController.getInvoices);
 
 router
   .route('/:invoiceId')

@@ -30,7 +30,6 @@ const createInvoice = async (body) => {
 
   // 3. Calculate utilities amount and breakdown
   let utilitiesAmount = 0;
-  const utilitiesBreakdown = [];
 
   // Get utility meters for this room
   const utilityMeters = await UtilityMeter.findAll({
@@ -40,18 +39,23 @@ const createInvoice = async (body) => {
     },
   });
 
-  utilityMeters.forEach(async (meter) => {
-    // Get 2 latest readings for this meter
-    const readings = await UtilityMeterReading.findAll({
-      where: { utilityMeterId: meter.id },
-      order: [['readingDate', 'DESC']],
-      limit: 2,
-    });
+  // Use map + Promise.all for async iteration
+  const utilitiesBreakdown = await Promise.all(
+    utilityMeters.map(async (meter) => {
+      // Get 2 latest readings for this meter
+      const readings = await UtilityMeterReading.findAll({
+        where: { utilityMeterId: meter.id },
+        order: [['readingDate', 'DESC']],
+        limit: 2,
+      });
 
-    if (readings.length >= 2) {
+      if (readings.length < 2) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Bạn chưa có đủ thông tin số đo công tơ để tạo hóa đơn');
+      }
+
       const latestReading = Number(readings[0].value);
       const previousReading = Number(readings[1].value);
-      const usage = Number(latestReading - previousReading);
+      const usage = latestReading - previousReading;
 
       // Get price per unit based on meter type
       let pricePerUnit = 0;
@@ -62,9 +66,8 @@ const createInvoice = async (body) => {
       }
 
       const total = usage * pricePerUnit;
-      utilitiesAmount += total;
 
-      utilitiesBreakdown.push({
+      return {
         meterType: meter.meterType,
         meterId: meter.id,
         unit: meter.unit,
@@ -73,11 +76,19 @@ const createInvoice = async (body) => {
         usage,
         pricePerUnit,
         total,
-      });
-    } else {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Bạn chưa có đủ thông tin số đo công tơ để tạo hóa đơn');
-    }
-  });
+      };
+    })
+  );
+
+  // Calculate total amount after all meters processed
+  utilitiesAmount = utilitiesBreakdown.reduce((sum, item) => sum + item.total, 0);
+
+  if (Number(utilitiesAmount) < 0) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Tổng tiền số đo công tơ không thể âm, có thể do số đo mới nhỏ hơn số đo cũ. Hãy kiểm tra lại'
+    );
+  }
 
   // 4. Calculate extra fees amount and breakdown
   let extraFeesAmount = 0;
@@ -103,7 +114,7 @@ const createInvoice = async (body) => {
   });
 
   // 5. Calculate total amount
-  const rentAmount = Number(room.rentAmount || 0);
+  const rentAmount = Number(room.price || 0);
   const totalAmount = rentAmount + utilitiesAmount + extraFeesAmount;
 
   // 6. Create invoice
@@ -143,6 +154,16 @@ const queryInvoices = async (filter, options) => {
 
   const { count, rows } = await Invoice.findAndCountAll({
     where: whereClause,
+    include: [
+      {
+        model: Contract,
+        as: 'contract',
+      },
+      {
+        model: Room,
+        as: 'room',
+      },
+    ],
     limit: parseInt(limit, 10),
     offset: parseInt(offset, 10),
     order,

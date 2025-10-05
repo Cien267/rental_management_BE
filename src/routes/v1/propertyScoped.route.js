@@ -140,12 +140,10 @@ router
   .delete(validate(readingValidation.deleteReading), readingController.deleteReading);
 
 // List all readings by property with optional filters in query
-router
-  .route('/:propertyId/utility-meters-readings')
-  .get((req, res, next) => {
-    req.query.propertyId = parseInt(req.params.propertyId, 10);
-    return readingController.getReadings(req, res, next);
-  });
+router.route('/:propertyId/utility-meters-readings').get((req, res, next) => {
+  req.query.propertyId = parseInt(req.params.propertyId, 10);
+  return readingController.getReadings(req, res, next);
+});
 
 // Bulk create readings by property
 router
