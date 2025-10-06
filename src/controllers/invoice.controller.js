@@ -21,6 +21,8 @@ const getInvoices = catchAsync(async (req, res) => {
     'periodStart',
     'periodEnd',
     'status',
+    'month',
+    'year',
   ]);
   const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
   filter.propertyId = propertyId;
