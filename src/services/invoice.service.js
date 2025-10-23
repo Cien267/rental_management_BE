@@ -22,6 +22,20 @@ const createInvoice = async (body) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy hợp đồng hoạt động cho phòng này');
   }
 
+  // check if there was a record for this month
+  const existedInvoice = await Invoice.findOne({
+    where: {
+      month,
+      year,
+    },
+  });
+  if (existedInvoice) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `Đã tồn tại hóa đơn tháng ${month}/${year} cho ${room.name}, vui lòng kiểm tra lại!`
+    );
+  }
+
   // 2. Get property record for utility prices
   const property = await Property.findByPk(propertyId);
   if (!property) {
