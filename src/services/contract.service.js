@@ -2,7 +2,31 @@ const httpStatus = require('http-status');
 const { Contract, Room, Tenant } = require('../models');
 const ApiError = require('../utils/ApiError');
 
-const createContract = async (body) => Contract.create(body);
+const createContract = async (body) => {
+  const creatingData = { ...body };
+  const existingContract = await Contract.findOne({
+    where: {
+      roomId: creatingData.roomId || 0,
+      tenantId: creatingData.tenantId || 0,
+    },
+  });
+
+  if (existingContract) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `Đã tồn tại hợp đồng gắn với phòng và người thuê này, vui lòng kiểm tra lại!`
+    );
+  }
+
+  const now = new Date();
+  const startDate = new Date(creatingData.startDate);
+  const endDate = new Date(creatingData.endDate);
+  if (startDate >= endDate)
+    throw new ApiError(httpStatus.BAD_REQUEST, `Thời gian bắt đầu không thể lớn hơn thời gian kết thúc hợp đồng!`);
+  if (endDate < now) creatingData.status = 'ended';
+
+  return Contract.create(creatingData);
+};
 
 const queryContracts = async (filter, options) => {
   const { limit = 10, page = 1, sortBy } = options;
@@ -42,9 +66,16 @@ const queryContracts = async (filter, options) => {
 const getContractById = async (id) => Contract.findByPk(id);
 
 const updateContractById = async (id, updateBody) => {
+  const updatingDate = { ...updateBody };
   const contract = await getContractById(id);
   if (!contract) throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy hợp đồng');
-  Object.assign(contract, updateBody);
+  const now = new Date();
+  const startDate = new Date(updatingDate.startDate);
+  const endDate = new Date(updatingDate.endDate);
+  if (startDate >= endDate)
+    throw new ApiError(httpStatus.BAD_REQUEST, `Thời gian bắt đầu không thể lớn hơn thời gian kết thúc hợp đồng!`);
+  if (endDate < now) updatingDate.status = 'ended';
+  Object.assign(contract, updatingDate);
   await contract.save();
   return contract;
 };
