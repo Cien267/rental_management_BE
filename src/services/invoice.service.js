@@ -27,6 +27,8 @@ const createInvoice = async (body) => {
     where: {
       month,
       year,
+      propertyId,
+      roomId,
     },
   });
   if (existedInvoice) {
@@ -98,10 +100,7 @@ const createInvoice = async (body) => {
   utilitiesAmount = utilitiesBreakdown.reduce((sum, item) => sum + item.total, 0);
 
   if (Number(utilitiesAmount) < 0) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Tổng tiền số đo công tơ không thể âm, có thể do số đo mới nhỏ hơn số đo cũ. Hãy kiểm tra lại'
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Số đo mới nhỏ hơn số đo cũ. Hãy kiểm tra lại');
   }
 
   // 4. Calculate extra fees amount and breakdown
