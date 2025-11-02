@@ -12,6 +12,7 @@ const extraFeeRoute = require('./extraFee.route');
 const invoiceRoute = require('./invoice.route');
 const paymentRoute = require('./payment.route');
 const uploadRoute = require('./upload.route');
+const AIRoute = require('./ai.route');
 const propertyScopedRoute = require('./propertyScoped.route');
 const config = require('../../config/config');
 
@@ -69,6 +70,10 @@ const defaultRoutes = [
   {
     path: '/properties',
     route: propertyScopedRoute,
+  },
+  {
+    path: '/ai',
+    route: AIRoute,
   },
 ];
 
