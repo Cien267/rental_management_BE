@@ -1,8 +1,8 @@
-# Use a lightweight Node.js image
-FROM node:18-alpine
+# Use latest Node 20 lightweight Alpine image
+FROM node:20-alpine
 
-# Create app directory and set permissions
-RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
+# Create app directory
+RUN mkdir -p /usr/src/node-app
 
 # Set working directory
 WORKDIR /usr/src/node-app
@@ -10,17 +10,18 @@ WORKDIR /usr/src/node-app
 # Switch to non-root user
 USER node
 
-# Copy package.json and package-lock.json (if exists)
-COPY package.json package-lock.json* ./
+# Copy package.json and package-lock.json (if exists), set ownership
+COPY --chown=node:node package.json package-lock.json* ./
 
 # Install dependencies using npm
 RUN npm install
 
-# Copy the rest of the application code
+# Copy rest of the application code, set ownership
 COPY --chown=node:node . .
 
-# Expose the port the app runs on
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Start the app
+# Ensure Express listens on the Railway-assigned PORT
+# Make sure your src/index.js uses: const PORT = process.env.PORT || 3000;
 CMD ["node", "src/index.js"]
