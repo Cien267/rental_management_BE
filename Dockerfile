@@ -26,4 +26,4 @@ USER node
 EXPOSE 3000
 
 # Start the app
-CMD ["./docker-entrypoint.sh"]
+CMD npm run db:migrate && node src/index.js
