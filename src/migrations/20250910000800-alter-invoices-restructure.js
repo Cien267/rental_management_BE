@@ -9,17 +9,17 @@ module.exports = {
     await queryInterface.addColumn('Invoices', 'invoiceDate', {
       type: Sequelize.DATEONLY,
       allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_DATE'),
+      defaultValue: Sequelize.literal('CURDATE()'),
     });
     await queryInterface.addColumn('Invoices', 'periodStart', {
       type: Sequelize.DATEONLY,
       allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_DATE'),
+      defaultValue: Sequelize.literal('CURDATE()'),
     });
     await queryInterface.addColumn('Invoices', 'periodEnd', {
       type: Sequelize.DATEONLY,
       allowNull: false,
-      defaultValue: Sequelize.literal('CURRENT_DATE'),
+      defaultValue: Sequelize.literal('CURDATE()'),
     });
     await queryInterface.changeColumn('Invoices', 'rentAmount', {
       type: Sequelize.DECIMAL(12, 2),
