@@ -8,18 +8,15 @@ module.exports = {
     // Add new columns
     await queryInterface.addColumn('Invoices', 'invoiceDate', {
       type: Sequelize.DATEONLY,
-      allowNull: false,
-      defaultValue: Sequelize.literal('CURDATE()'),
+      allowNull: true,
     });
     await queryInterface.addColumn('Invoices', 'periodStart', {
       type: Sequelize.DATEONLY,
-      allowNull: false,
-      defaultValue: Sequelize.literal('CURDATE()'),
+      allowNull: true,
     });
     await queryInterface.addColumn('Invoices', 'periodEnd', {
       type: Sequelize.DATEONLY,
-      allowNull: false,
-      defaultValue: Sequelize.literal('CURDATE()'),
+      allowNull: true,
     });
     await queryInterface.changeColumn('Invoices', 'rentAmount', {
       type: Sequelize.DECIMAL(12, 2),
