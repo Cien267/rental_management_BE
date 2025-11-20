@@ -5,11 +5,6 @@ module.exports = {
       await queryInterface.removeConstraint('Invoices', 'unique_contract_month_year');
     } catch (e) {}
 
-    // Add new columns
-    await queryInterface.addColumn('Invoices', 'invoiceDate', {
-      type: Sequelize.DATEONLY,
-      allowNull: true,
-    });
     await queryInterface.addColumn('Invoices', 'periodStart', {
       type: Sequelize.DATEONLY,
       allowNull: true,
@@ -34,12 +29,6 @@ module.exports = {
       defaultValue: 0,
     });
     await queryInterface.addColumn('Invoices', 'notes', { type: Sequelize.TEXT, allowNull: true });
-
-    await queryInterface.addColumn('Invoices', 'totalAmount', {
-      type: Sequelize.DECIMAL(12, 2),
-      allowNull: false,
-      defaultValue: 0,
-    });
 
     // Update status enum to include 'partially_paid'
     await queryInterface.changeColumn('Invoices', 'status', {
@@ -67,16 +56,7 @@ module.exports = {
       defaultValue: 0,
     });
     await queryInterface.addColumn('Invoices', 'waterUsed', { type: Sequelize.INTEGER, allowNull: true, defaultValue: 0 });
-    try {
-      await queryInterface.removeColumn('Invoices', 'totalAmount');
-    } catch (e) {}
-    await queryInterface.addColumn('Invoices', 'totalAmount', {
-      type: Sequelize.DECIMAL(12, 2),
-      allowNull: false,
-      defaultValue: 0,
-    });
 
-    await queryInterface.removeColumn('Invoices', 'invoiceDate');
     await queryInterface.removeColumn('Invoices', 'periodStart');
     await queryInterface.removeColumn('Invoices', 'periodEnd');
     await queryInterface.removeColumn('Invoices', 'utilitiesAmount');
