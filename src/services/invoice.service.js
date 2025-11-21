@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 
 const createInvoice = async (body) => {
   try {
+    console.log('debug', { body });
     const { propertyId, roomId, month, year, periodStart, periodEnd, notes } = body;
 
     const property = await Property.findByPk(propertyId);
