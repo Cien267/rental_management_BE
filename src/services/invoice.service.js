@@ -3,178 +3,182 @@ const { Invoice, Contract, Room, Property, UtilityMeter, UtilityMeterReading, Ex
 const ApiError = require('../utils/ApiError');
 
 const createInvoice = async (body) => {
-  const { propertyId, roomId, month, year, periodStart, periodEnd, notes } = body;
+  try {
+    const { propertyId, roomId, month, year, periodStart, periodEnd, notes } = body;
 
-  const property = await Property.findByPk(propertyId);
-  if (!property) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng trọ');
-  }
-
-  const handleCreateSingleInvoice = async (internalRoom) => {
-    // Get active contract for this room
-    const contract = await Contract.findOne({
-      where: {
-        roomId: internalRoom.id,
-        status: 'active',
-      },
-    });
-    if (!contract) {
-      throw new ApiError(
-        httpStatus.NOT_FOUND,
-        `${internalRoom.name}: Không tìm thấy hợp đồng hoạt động cho ${internalRoom.name}`
-      );
+    const property = await Property.findByPk(propertyId);
+    if (!property) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng trọ');
     }
 
-    // check if there was a record for this month
-    const existedInvoice = await Invoice.findOne({
-      where: {
-        month,
-        year,
-        propertyId,
-        roomId: internalRoom.id,
-      },
-    });
-    if (existedInvoice) {
-      throw new ApiError(
-        httpStatus.BAD_REQUEST,
-        `${internalRoom.name}: Đã tồn tại hóa đơn tháng ${month}/${year} cho ${internalRoom.name}, vui lòng kiểm tra lại!`
-      );
-    }
-
-    // 3. Calculate utilities amount and breakdown
-    let utilitiesAmount = 0;
-
-    // Get utility meters for this room
-    const utilityMeters = await UtilityMeter.findAll({
-      where: {
-        roomId: internalRoom.id,
-        active: true,
-      },
-    });
-
-    // Use map + Promise.all for async iteration
-    const utilitiesBreakdown = await Promise.all(
-      utilityMeters.map(async (meter) => {
-        // Get 2 latest readings for this meter
-        const readings = await UtilityMeterReading.findAll({
-          where: { utilityMeterId: meter.id },
-          order: [['readingDate', 'DESC']],
-          limit: 2,
-        });
-
-        if (readings.length < 2) {
-          throw new ApiError(
-            httpStatus.NOT_FOUND,
-            `${internalRoom.name}: Bạn chưa có đủ thông tin số đo công tơ để tạo hóa đơn`
-          );
-        }
-
-        const latestReading = Number(readings[0].value);
-        const previousReading = Number(readings[1].value);
-        const usage = latestReading - previousReading;
-
-        // Get price per unit based on meter type
-        let pricePerUnit = 0;
-        if (meter.meterType === 'electricity') {
-          pricePerUnit = Number(property.electricityPricePerKwh || 0);
-        } else if (meter.meterType === 'water') {
-          pricePerUnit = Number(property.waterPricePerM3 || 0);
-        }
-
-        const total = usage * pricePerUnit;
-
-        return {
-          meterType: meter.meterType,
-          meterId: meter.id,
-          unit: meter.unit,
-          previousReading,
-          latestReading,
-          usage,
-          pricePerUnit,
-          total,
-        };
-      })
-    );
-
-    // Calculate total amount after all meters processed
-    utilitiesAmount = utilitiesBreakdown.reduce((sum, item) => sum + item.total, 0);
-
-    if (Number(utilitiesAmount) < 0) {
-      throw new ApiError(httpStatus.BAD_REQUEST, `${internalRoom.name}: Số đo mới nhỏ hơn số đo cũ. Hãy kiểm tra lại`);
-    }
-
-    // 4. Calculate extra fees amount and breakdown
-    let extraFeesAmount = 0;
-    const extraFeesBreakdown = [];
-
-    const extraFees = await ExtraFee.findAll({
-      where: {
-        propertyId,
-        isActive: true,
-        chargeType: 'monthly',
-      },
-    });
-
-    extraFees.forEach((fee) => {
-      extraFeesAmount += Number(fee.amount || 0);
-      extraFeesBreakdown.push({
-        id: fee.id,
-        name: fee.name,
-        description: fee.description,
-        amount: fee.amount,
-        chargeType: fee.chargeType,
+    const handleCreateSingleInvoice = async (internalRoom) => {
+      // Get active contract for this room
+      const contract = await Contract.findOne({
+        where: {
+          roomId: internalRoom.id,
+          status: 'active',
+        },
       });
-    });
+      if (!contract) {
+        throw new ApiError(
+          httpStatus.NOT_FOUND,
+          `${internalRoom.name}: Không tìm thấy hợp đồng hoạt động cho ${internalRoom.name}`
+        );
+      }
 
-    // 5. Calculate total amount
-    const rentAmount = Number(internalRoom.price || 0);
-    const totalAmount = rentAmount + utilitiesAmount + extraFeesAmount;
+      // check if there was a record for this month
+      const existedInvoice = await Invoice.findOne({
+        where: {
+          month,
+          year,
+          propertyId,
+          roomId: internalRoom.id,
+        },
+      });
+      if (existedInvoice) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          `${internalRoom.name}: Đã tồn tại hóa đơn tháng ${month}/${year} cho ${internalRoom.name}, vui lòng kiểm tra lại!`
+        );
+      }
 
-    // 6. Create invoice
-    const invoiceData = {
-      contractId: contract.id,
-      propertyId,
-      roomId: internalRoom.id,
-      invoiceDate: new Date(), // Current time as invoiceDate
-      periodStart,
-      periodEnd,
-      rentAmount,
-      utilitiesAmount,
-      extraFeesAmount,
-      totalAmount,
-      status: 'unpaid', // Auto set to unpaid
-      notes,
-      utilitiesBreakdown,
-      extraFeesBreakdown,
-      month: month || new Date().getMonth() + 1,
-      year: year || new Date().getFullYear(),
+      // 3. Calculate utilities amount and breakdown
+      let utilitiesAmount = 0;
+
+      // Get utility meters for this room
+      const utilityMeters = await UtilityMeter.findAll({
+        where: {
+          roomId: internalRoom.id,
+          active: true,
+        },
+      });
+
+      // Use map + Promise.all for async iteration
+      const utilitiesBreakdown = await Promise.all(
+        utilityMeters.map(async (meter) => {
+          // Get 2 latest readings for this meter
+          const readings = await UtilityMeterReading.findAll({
+            where: { utilityMeterId: meter.id },
+            order: [['readingDate', 'DESC']],
+            limit: 2,
+          });
+
+          if (readings.length < 2) {
+            throw new ApiError(
+              httpStatus.NOT_FOUND,
+              `${internalRoom.name}: Bạn chưa có đủ thông tin số đo công tơ để tạo hóa đơn`
+            );
+          }
+
+          const latestReading = Number(readings[0].value);
+          const previousReading = Number(readings[1].value);
+          const usage = latestReading - previousReading;
+
+          // Get price per unit based on meter type
+          let pricePerUnit = 0;
+          if (meter.meterType === 'electricity') {
+            pricePerUnit = Number(property.electricityPricePerKwh || 0);
+          } else if (meter.meterType === 'water') {
+            pricePerUnit = Number(property.waterPricePerM3 || 0);
+          }
+
+          const total = usage * pricePerUnit;
+
+          return {
+            meterType: meter.meterType,
+            meterId: meter.id,
+            unit: meter.unit,
+            previousReading,
+            latestReading,
+            usage,
+            pricePerUnit,
+            total,
+          };
+        })
+      );
+
+      // Calculate total amount after all meters processed
+      utilitiesAmount = utilitiesBreakdown.reduce((sum, item) => sum + item.total, 0);
+
+      if (Number(utilitiesAmount) < 0) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `${internalRoom.name}: Số đo mới nhỏ hơn số đo cũ. Hãy kiểm tra lại`);
+      }
+
+      // 4. Calculate extra fees amount and breakdown
+      let extraFeesAmount = 0;
+      const extraFeesBreakdown = [];
+
+      const extraFees = await ExtraFee.findAll({
+        where: {
+          propertyId,
+          isActive: true,
+          chargeType: 'monthly',
+        },
+      });
+
+      extraFees.forEach((fee) => {
+        extraFeesAmount += Number(fee.amount || 0);
+        extraFeesBreakdown.push({
+          id: fee.id,
+          name: fee.name,
+          description: fee.description,
+          amount: fee.amount,
+          chargeType: fee.chargeType,
+        });
+      });
+
+      // 5. Calculate total amount
+      const rentAmount = Number(internalRoom.price || 0);
+      const totalAmount = rentAmount + utilitiesAmount + extraFeesAmount;
+
+      // 6. Create invoice
+      const invoiceData = {
+        contractId: contract.id,
+        propertyId,
+        roomId: internalRoom.id,
+        invoiceDate: new Date(), // Current time as invoiceDate
+        periodStart,
+        periodEnd,
+        rentAmount,
+        utilitiesAmount,
+        extraFeesAmount,
+        totalAmount,
+        status: 'unpaid', // Auto set to unpaid
+        notes,
+        utilitiesBreakdown,
+        extraFeesBreakdown,
+        month: month || new Date().getMonth() + 1,
+        year: year || new Date().getFullYear(),
+      };
+      return Invoice.create(invoiceData);
     };
-    return Invoice.create(invoiceData);
-  };
 
-  if (Number(roomId) === 0) {
-    const rooms = await Room.findAll({ where: { propertyId } });
-    if (!rooms || rooms.length === 0) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng nào trong nhà trọ này');
+    if (Number(roomId) === 0) {
+      const rooms = await Room.findAll({ where: { propertyId } });
+      if (!rooms || rooms.length === 0) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng nào trong nhà trọ này');
+      }
+
+      const settled = await Promise.allSettled(rooms.map((r) => handleCreateSingleInvoice(r)));
+      const parallelResults = settled.map((s, idx) => {
+        if (s.status === 'fulfilled') return s.value;
+        const room = rooms[idx];
+        return { roomId: room.id, skipped: true, reason: s.reason.message || String(s.reason) || 'error' };
+      });
+
+      return parallelResults;
     }
 
-    const settled = await Promise.allSettled(rooms.map((r) => handleCreateSingleInvoice(r)));
-    const parallelResults = settled.map((s, idx) => {
-      if (s.status === 'fulfilled') return s.value;
-      const room = rooms[idx];
-      return { roomId: room.id, skipped: true, reason: s.reason.message || String(s.reason) || 'error' };
-    });
+    // Single room flow
+    const room = await Room.findByPk(roomId);
+    if (!room) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng');
+    }
 
-    return parallelResults;
+    return handleCreateSingleInvoice(room);
+  } catch (error) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Lỗi khi tạo hóa đơn');
   }
-
-  // Single room flow
-  const room = await Room.findByPk(roomId);
-  if (!room) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Không tìm thấy phòng');
-  }
-
-  return handleCreateSingleInvoice(room);
 };
 
 const queryInvoices = async (filter, options) => {

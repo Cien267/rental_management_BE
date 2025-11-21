@@ -4,10 +4,14 @@ const catchAsync = require('../utils/catchAsync');
 const { invoiceService } = require('../services');
 
 const createInvoice = catchAsync(async (req, res) => {
-  const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
-  req.body.propertyId = propertyId;
-  const invoice = await invoiceService.createInvoice(req.body);
-  res.status(httpStatus.CREATED).send(invoice);
+  try {
+    const propertyId = parseInt(req.params.propertyId || req.query.propertyId, 10);
+    req.body.propertyId = propertyId;
+    const invoice = await invoiceService.createInvoice(req.body);
+    res.status(httpStatus.CREATED).send(invoice);
+  } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: `Lỗi khi tạo hóa đơn: ${error}` });
+  }
 });
 
 const getInvoices = catchAsync(async (req, res) => {
