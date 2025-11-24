@@ -51,11 +51,11 @@ module.exports = {
         type: Sequelize.DATE,
       },
     });
-    await queryInterface.addConstraint('Invoices', {
-      fields: ['contractId', 'month', 'year'],
-      type: 'unique',
-      name: 'unique_contract_month_year',
-    });
+    // await queryInterface.addConstraint('Invoices', {
+    //   fields: ['contractId', 'month', 'year'],
+    //   type: 'unique',
+    //   name: 'unique_contract_month_year',
+    // });
   },
 
   down: async (queryInterface, Sequelize) => {
