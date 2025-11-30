@@ -75,6 +75,10 @@ const defaultRoutes = [
     path: '/ai',
     route: AIRoute,
   },
+  {
+    path: '/ping',
+    route: (req, res) => res.status(200).send('pong'),
+  },
 ];
 
 const devRoutes = [
